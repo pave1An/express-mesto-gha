@@ -10,7 +10,6 @@
   },
   "rules": {
     "no-underscore-dangle" : "off",
-    "no-console" :"off",
-    "eslint linebreak-style" : "off"
+    "no-console" :"off"
   }
 }

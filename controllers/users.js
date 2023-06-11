@@ -16,7 +16,12 @@ const getUserById = (req, res) => {
       if (!user) return res.status(notFound).send({ message: 'Пользователь по указанному Id не найден' });
       return res.send(user);
     })
-    .catch(() => res.status(internalError).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(badRequest).send({ message: 'Передан некорректный _id пользователя' });
+      }
+      return res.status(internalError).send({ message: 'На сервере произошла ошибка' });
+    });
 };
 
 const postUser = (req, res) => {

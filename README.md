@@ -13,4 +13,4 @@
 * MongoDB
 * JavaScript
 
-Посмотреть работу можно [здесь](# "Перейти").
+Посмотреть работу можно [здесь](https://github.com/pave1An/express-mesto-gha "Перейти").

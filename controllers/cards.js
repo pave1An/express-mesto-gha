@@ -29,7 +29,12 @@ const deleteCard = (req, res) => {
       if (!card) return res.status(notFound).send({ message: 'Передан несуществующий _id карточки' });
       return res.send(card);
     })
-    .catch(() => res.status(internalError).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(badRequest).send({ message: 'Передан некорректный _id карточки' });
+      }
+      return res.status(internalError).send({ message: 'На сервере произошла ошибка' });
+    });
 };
 
 const likeCard = (req, res) => {
