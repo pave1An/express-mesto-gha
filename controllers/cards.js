@@ -57,7 +57,7 @@ const dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => {
-      if (!card) return res.status(notFound).send({ message: 'Передан несуществующий _id карточки' })
+      if (!card) return res.status(notFound).send({ message: 'Передан несуществующий _id карточки' });
       return res.send(card);
     })
     .catch((err) => {
