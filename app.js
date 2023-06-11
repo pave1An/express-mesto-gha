@@ -17,6 +17,4 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use(router);
 
-app.listen(PORT, () => {
-  console.log('OK');
-});
+app.listen(PORT, () => {});
