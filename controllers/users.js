@@ -1,8 +1,5 @@
 const User = require('../models/user');
-
-const badRequest = 400;
-const notFound = 404;
-const internalError = 500;
+const { badRequest, notFound, internalError } = require('../utils/constants');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -25,7 +22,8 @@ const getUserById = (req, res) => {
 };
 
 const postUser = (req, res) => {
-  User.create({ ...req.body })
+  const { name, about, avatar } = req.body;
+  User.create({ name, about, avatar })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
