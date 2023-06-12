@@ -1,8 +1,5 @@
 const Card = require('../models/card');
-
-const badRequest = 400;
-const notFound = 404;
-const internalError = 500;
+const { badRequest, notFound, internalError } = require('../utils/constants');
 
 const getCards = (req, res) => {
   Card.find({})
@@ -13,7 +10,8 @@ const getCards = (req, res) => {
 };
 
 const postCard = (req, res) => {
-  Card.create({ ...req.body, owner: req.user._id })
+  const { name, link } = req.body;
+  Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
