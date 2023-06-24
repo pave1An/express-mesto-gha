@@ -1,5 +1,3 @@
-const badRequest = 400;
-const notFound = 404;
-const internalError = 500;
+const linkRegExp = /^(https?:\/\/)(www\.)?[\w-.]+\.[a-zA-z]{2,}([\w-.~:/?#[\]@!$&'()*+,;=])*$/;
 
-module.exports = { badRequest, notFound, internalError };
+module.exports = { linkRegExp };

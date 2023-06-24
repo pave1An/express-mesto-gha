@@ -13,7 +13,7 @@ const getUsers = (req, res, next) => {
 const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => new NotFoundError('Пользователь по указанному _id не найден'))
-    .then((user) => res.send(user))
+    .then((user) => res.status(200).send(user))
     .catch(next);
 };
 
@@ -26,7 +26,7 @@ const createUser = (req, res, next) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.send(user.deletePassword()))
+        .then((user) => res.status(200).send(user.deletePassword()))
         .catch(next);
     })
     .catch(next);
