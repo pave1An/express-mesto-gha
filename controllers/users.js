@@ -1,79 +1,93 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const { badRequest, notFound, internalError } = require('../utils/constants');
+const NotFoundError = require('../utils/errors/not-found-error');
+const UnauthorizedError = require('../utils/errors/unauthorized-error');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(internalError).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) return res.status(notFound).send({ message: 'Пользователь по указанному Id не найден' });
-      return res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(badRequest).send({ message: 'Передан некорректный _id пользователя' });
-      }
-      return res.status(internalError).send({ message: 'На сервере произошла ошибка' });
-    });
-};
-
-const postUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+    .orFail(() => new NotFoundError('Пользователь по указанному _id не найден'))
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(badRequest).send({ message: 'Переданы некорректные данные при создании пользователя' });
-      }
-      return res.status(internalError).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
 
-const patchUser = (req, res) => {
+const createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      })
+        .then((user) => res.send(user.deletePassword()))
+        .catch(next);
+    })
+    .catch(next);
+};
+
+const patchUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
     { new: true, runValidators: true },
   )
-    .then((user) => {
-      if (!user) return res.status(notFound).send({ message: 'Пользователь по указанному Id не найден' });
-      return res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(badRequest).send({ message: 'Переданы некорректные данные при обновлении данных пользователя' });
-      }
-      return res.status(internalError).send({ message: 'На сервере произошла ошибка' });
-    });
+    .orFail(() => new NotFoundError('Пользователь по указанному _id не найден'))
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
-const patchAvatar = (req, res) => {
+const patchAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar: req.body.avatar },
     { new: true, runValidators: true },
   )
+    .then((user) => res.send(user))
+    .catch(next);
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email || !password) throw new UnauthorizedError();
+  User.findOne({ email })
+    .select('+password')
+    .orFail(() => new UnauthorizedError())
     .then((user) => {
-      if (!user) return res.status(notFound).send({ message: 'Пользователь по указанному Id не найден' });
-      return res.send(user);
+      bcrypt.compare(String(password), user.password)
+        .then((isUserValid) => {
+          if (isUserValid) {
+            const token = jwt.sign({ _id: user._id }, 'secret-key');
+            res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true });
+            res.send(user.deletePassword());
+          } else {
+            throw new UnauthorizedError();
+          }
+        })
+        .catch(next);
     })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(badRequest).send({ message: 'Переданы некорректные данные при обновлении аватара' });
-      }
-      return res.status(internalError).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
+};
+
+const getUserInfo = (req, res, next) => {
+  User.findOne({ _id: req.user })
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
 module.exports = {
   getUsers,
   getUserById,
-  postUser,
+  createUser,
   patchUser,
   patchAvatar,
+  login,
+  getUserInfo,
 };

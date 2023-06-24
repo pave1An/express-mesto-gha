@@ -1,9 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
+const { errors } = require('celebrate');
 const router = require('./routes/index');
 const limiter = require('./utils/rate-limit');
+const handleError = require('./middlewares/handleError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -14,11 +17,10 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 
 app.use(helmet());
 app.use(limiter);
-app.use((req, res, next) => {
-  req.user = { _id: '6481979a5e5ab8b7232b1570' };
-  next();
-});
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(router);
+app.use(errors());
+app.use(handleError);
 
 app.listen(PORT, () => {});
