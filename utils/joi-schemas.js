@@ -7,7 +7,7 @@ module.exports = {
   }),
 
   userSchema: Joi.object().keys({
-    email: Joi.string().email().required().min(5),
+    email: Joi.string().email({ minDomainSegments: 2 }).required().min(5),
     password: Joi.string().required().min(3),
     name: Joi.string().optional().min(2).max(30),
     about: Joi.string().optional().min(2).max(30),
@@ -19,7 +19,7 @@ module.exports = {
   }),
 
   loginSchema: Joi.object().keys({
-    email: Joi.string().email().required().min(5),
+    email: Joi.string().email({ minDomainSegments: 2 }).required().min(5),
     password: Joi.string().required().min(3),
   }),
 

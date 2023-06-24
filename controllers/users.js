@@ -56,7 +56,6 @@ const patchAvatar = (req, res, next) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) throw new UnauthorizedError();
   User.findOne({ email })
     .select('+password')
     .orFail(() => new UnauthorizedError())
