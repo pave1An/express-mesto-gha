@@ -21,11 +21,13 @@ const deleteCard = (req, res, next) => {
   Card.findOne({ _id: req.params.cardId })
     .orFail(() => new NotFoundError('Такой карточки не существует'))
     .then((card) => {
-      if (card.owner !== req.user) {
+      const cardOwner = card.owner.toString();
+      if (cardOwner !== req.user._id) {
         throw new ForbiddenError('Попытка удалить карточку другого пользователя');
       } else {
-        Card.deleteOne({ _id: card._id })
-          .then((deletedCard) => res.send(deletedCard))
+        const cardId = card._id.toString();
+        Card.deleteOne({ _id: cardId })
+          .then((data) => res.send(data))
           .catch(next);
       }
     })
