@@ -1,5 +1,4 @@
 const Card = require('../models/card');
-const ForbiddenError = require('../utils/errors/forbidden-error');
 const NotFoundError = require('../utils/errors/not-found-error');
 
 const getCards = (req, res, next) => {
@@ -19,7 +18,7 @@ const postCard = (req, res, next) => {
 
 const deleteCard = (req, res, next) => {
   Card.deleteOne({ _id: req.params.cardId, owner: req.user })
-    .orFail(() => new NotFoundError('Карточки переданным _id не существует'))
+    .orFail(() => new NotFoundError('Такой карточки не существует'))
     .then((card) => res.send(card))
     .catch(next);
 };
