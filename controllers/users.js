@@ -26,7 +26,7 @@ const createUser = (req, res, next) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.status(200).send(user.deletePassword()))
+        .then((user) => res.status(201).send(user.deletePassword()))
         .catch(next);
     })
     .catch(next);
